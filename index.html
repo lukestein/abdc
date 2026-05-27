@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ABDC Journal Quality List 2025</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">2025 ABDC Journal Quality List</p>
+          <h1>Journal quality lookup</h1>
+        </div>
+        <div class="source-block">
+          <span id="total-count">2,650</span>
+          <small>journals</small>
+        </div>
+      </header>
+
+      <section class="metrics" aria-label="Summary">
+        <div class="metric">
+          <span class="metric-value" id="visible-count">0</span>
+          <span class="metric-label">shown</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="astar-count">0</span>
+          <span class="metric-label">A* shown</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="discipline-count">0</span>
+          <span class="metric-label">disciplines</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="active-sort">Rating</span>
+          <span class="metric-label">sort</span>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Filters">
+        <label class="control control-wide">
+          <span>Journal title</span>
+          <input id="title-filter" type="search" autocomplete="off" placeholder="Partial journal name">
+        </label>
+        <label class="control">
+          <span>Discipline</span>
+          <input id="discipline-filter" type="search" list="discipline-options" autocomplete="off" placeholder="Finance, real estate, economics">
+          <datalist id="discipline-options"></datalist>
+        </label>
+        <label class="control">
+          <span>Publisher, ISSN, FoR</span>
+          <input id="detail-filter" type="search" autocomplete="off" placeholder="Any text">
+        </label>
+        <div class="button-row actions" aria-label="Actions">
+          <button id="reset-filters" type="button">Reset</button>
+        </div>
+        <div class="download-actions" aria-label="Downloads">
+          <span>Download</span>
+          <div class="download-buttons">
+            <button id="download-csv" type="button">Filtered CSV</button>
+            <a href="ABDC-JQL-2025-v2-270526.xlsx" download>Original XLSX</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="rating-strip" aria-label="Rating distribution">
+        <button class="rating-pill" type="button" data-rating="A*" aria-pressed="false">
+          <span>A*</span><strong id="pill-astar">0</strong>
+        </button>
+        <button class="rating-pill" type="button" data-rating="A" aria-pressed="false">
+          <span>A</span><strong id="pill-a">0</strong>
+        </button>
+        <button class="rating-pill" type="button" data-rating="B" aria-pressed="false">
+          <span>B</span><strong id="pill-b">0</strong>
+        </button>
+        <button class="rating-pill" type="button" data-rating="C" aria-pressed="false">
+          <span>C</span><strong id="pill-c">0</strong>
+        </button>
+      </section>
+
+      <section class="table-wrap" aria-live="polite">
+        <table>
+          <colgroup>
+            <col class="col-journal">
+            <col class="col-rating">
+            <col class="col-discipline">
+            <col class="col-publisher">
+            <col class="col-year">
+            <col class="col-issn">
+          </colgroup>
+          <thead>
+            <tr>
+              <th><button type="button" data-sort="title">Journal</button></th>
+              <th><button type="button" data-sort="rating">Rating</button></th>
+              <th><button type="button" data-sort="discipline">Discipline</button></th>
+              <th><button type="button" data-sort="publisher">Publisher</button></th>
+              <th><button type="button" data-sort="year">Year</button></th>
+              <th><button type="button" data-sort="issn">ISSN</button></th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" hidden>No matching journals</div>
+      </section>
+
+      <footer>
+        <span>Source: ABDC-JQL-2025-v2-270526.xlsx</span>
+        <a href="https://abdc.edu.au/wp-content/uploads/2026/05/ABDC-JQL-2025-v2-270526.xlsx">ABDC source page file</a>
+      </footer>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
