@@ -68,6 +68,12 @@ function addInitialWindows(tokens, words) {
   }
 }
 
+function addPrefixInitials(tokens, words) {
+  for (let end = 2; end <= words.length; end += 1) {
+    tokens.add(titleInitials(words.slice(0, end)));
+  }
+}
+
 function buildTitleSearchTokens(title) {
   const words = titleWords(title);
   const meaningfulWords = words.filter((word) => !titleStopWords.has(word));
@@ -75,6 +81,7 @@ function buildTitleSearchTokens(title) {
   const textTokens = new Set([normalize(title), compactTitle]);
   const codeTokens = new Set([titleInitials(words), titleInitials(meaningfulWords)]);
   addInitialWindows(codeTokens, meaningfulWords);
+  addPrefixInitials(codeTokens, meaningfulWords);
 
   for (const alias of titleAliases.get(compactTitle) ?? []) {
     codeTokens.add(alias);
