@@ -6,6 +6,14 @@ const qualityOrder = new Map([
   ["B", 2],
   ["C", 1],
 ]);
+const titleStopWords = new Set(["a", "an", "and", "for", "in", "of", "on", "the", "to"]);
+const titleAliases = new Map([
+  ["reviewofeconomicstudies", ["restud"]],
+  ["thereviewofeconomicstudies", ["restud"]],
+  ["reviewofeconomicsandstatistics", ["restat"]],
+  ["thereviewofeconomicsandstatistics", ["restat"]],
+]);
+const titleAliasQueries = new Set([...titleAliases.values()].flat());
 
 const state = {
   title: "",
@@ -37,6 +45,49 @@ const els = {
 
 function normalize(value) {
   return String(value ?? "").toLowerCase().trim();
+}
+
+function searchCompact(value) {
+  return normalize(value).replace(/[^a-z0-9]/g, "");
+}
+
+function titleWords(title) {
+  return normalize(title)
+    .replace(/&/g, " and ")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function titleInitials(words) {
+  return words.map((word) => word[0]).join("");
+}
+
+function addInitialWindows(tokens, words) {
+  for (let start = 0; start < words.length - 1; start += 1) {
+    tokens.add(titleInitials(words.slice(start, start + 2)));
+  }
+}
+
+function buildTitleSearchTokens(title) {
+  const words = titleWords(title);
+  const meaningfulWords = words.filter((word) => !titleStopWords.has(word));
+  const compactTitle = searchCompact(title);
+  const textTokens = new Set([normalize(title), compactTitle]);
+  const codeTokens = new Set([titleInitials(words), titleInitials(meaningfulWords)]);
+  addInitialWindows(codeTokens, meaningfulWords);
+
+  for (const alias of titleAliases.get(compactTitle) ?? []) {
+    codeTokens.add(alias);
+  }
+
+  return {
+    text: [...textTokens].filter(Boolean),
+    code: [...codeTokens].filter(Boolean),
+  };
+}
+
+for (const row of data) {
+  row.titleSearch = buildTitleSearchTokens(row.title);
 }
 
 function qualityValue(row) {
@@ -71,8 +122,23 @@ function includesText(value, query) {
   return normalize(value).includes(query);
 }
 
+function titleMatches(row, query) {
+  if (!query) return true;
+  const compactQuery = searchCompact(query);
+  const isShortCode = compactQuery.length <= 3 && /^[a-z]+$/.test(compactQuery) && !query.includes(" ");
+
+  if (isShortCode || titleAliasQueries.has(compactQuery)) {
+    return row.titleSearch.code.some((token) => token === compactQuery);
+  }
+
+  return (
+    row.titleSearch.text.some((token) => token.includes(query) || token.includes(compactQuery)) ||
+    row.titleSearch.code.some((token) => token.includes(compactQuery))
+  );
+}
+
 function rowMatches(row) {
-  if (state.title && !includesText(row.title, state.title)) return false;
+  if (!titleMatches(row, state.title)) return false;
   if (state.ratings.size && !state.ratings.has(row.rating)) return false;
   if (state.discipline) {
     const target = `${row.discipline} ${row.forCode}`;
