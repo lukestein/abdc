@@ -146,9 +146,8 @@ function titleMatches(row, query) {
   );
 }
 
-function rowMatches(row) {
+function rowMatchesSearchFilters(row) {
   if (!titleMatches(row, state.title)) return false;
-  if (state.ratings.size && !state.ratings.has(row.rating)) return false;
   if (state.discipline) {
     const target = `${row.discipline} ${row.forCode}`;
     if (!includesText(target, state.discipline)) return false;
@@ -158,6 +157,10 @@ function rowMatches(row) {
     if (!includesText(target, state.detail)) return false;
   }
   return true;
+}
+
+function rowMatches(row) {
+  return rowMatchesSearchFilters(row) && (!state.ratings.size || state.ratings.has(row.rating));
 }
 
 function badgeClass(rating) {
@@ -192,12 +195,12 @@ function escapeHtml(value) {
   });
 }
 
-function updateMetrics(rows) {
+function updateMetrics(rows, availableRows) {
   const astar = rows.filter((row) => row.rating === "A*").length;
   const disciplines = new Set(rows.map((row) => row.discipline)).size;
   const distribution = { "A*": 0, A: 0, B: 0, C: 0 };
 
-  for (const row of rows) {
+  for (const row of availableRows) {
     distribution[row.rating] = (distribution[row.rating] ?? 0) + 1;
   }
 
@@ -256,9 +259,10 @@ function scheduleUpdate() {
 }
 
 function applyState() {
-  state.filtered = data.filter(rowMatches).sort(compareRows);
+  const availableRows = data.filter(rowMatchesSearchFilters);
+  state.filtered = availableRows.filter(rowMatches).sort(compareRows);
   renderRows(state.filtered);
-  updateMetrics(state.filtered);
+  updateMetrics(state.filtered, availableRows);
   updateSortHeaders();
   updateSortControls();
   updateRatingPills();
