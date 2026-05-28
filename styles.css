@@ -196,7 +196,7 @@ button:focus-visible {
 }
 
 .sort-control {
-  grid-template-columns: minmax(0, 1fr) minmax(112px, auto);
+  grid-template-columns: minmax(120px, 1fr) minmax(112px, auto);
   align-items: end;
 }
 
@@ -217,19 +217,26 @@ button {
   font-weight: 760;
 }
 
+.download-buttons button,
 .download-buttons a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-color: rgba(49, 95, 155, 0.36);
+  background: #edf3fb;
+  color: #234a7a;
   text-decoration: none;
 }
 
 .button-row button:hover,
 .sort-direction button:hover,
-.download-buttons button:hover,
-.download-buttons a:hover,
 .rating-pill:hover {
   background: #dff1ee;
+}
+
+.download-buttons button:hover,
+.download-buttons a:hover {
+  background: #dfeaf8;
 }
 
 .rating-strip {
@@ -424,9 +431,10 @@ footer a {
 
 @media (max-width: 1400px) {
   .controls {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(220px, 1fr) minmax(200px, 0.85fr) minmax(220px, 1fr);
   }
 
+  .sort-control,
   .download-actions {
     grid-column: span 2;
   }
