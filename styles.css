@@ -139,7 +139,7 @@ footer {
 
 .controls {
   display: grid;
-  grid-template-columns: minmax(260px, 1.35fr) minmax(220px, 1fr) minmax(220px, 0.9fr) minmax(210px, 0.75fr) auto minmax(250px, auto);
+  grid-template-columns: minmax(250px, 1.25fr) minmax(180px, 0.82fr) minmax(190px, 0.9fr) minmax(250px, 1fr) minmax(224px, auto);
   gap: 12px;
   align-items: end;
   padding: 16px;
@@ -147,14 +147,14 @@ footer {
 
 .control,
 .sort-control,
+.utility-actions,
 .download-actions {
   display: grid;
   gap: 7px;
   min-width: 0;
 }
 
-.control span,
-.download-actions > span {
+.control span {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 780;
@@ -191,13 +191,32 @@ button:focus-visible {
   grid-template-columns: minmax(80px, 1fr);
 }
 
-.download-buttons {
-  grid-template-columns: repeat(2, minmax(112px, 1fr));
-}
-
 .sort-control {
   grid-template-columns: minmax(120px, 1fr) minmax(112px, auto);
   align-items: end;
+}
+
+.utility-actions {
+  grid-template-columns: minmax(82px, 1fr) 124px;
+  align-items: end;
+}
+
+.download-actions {
+  gap: 0;
+}
+
+.download-actions > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.download-buttons {
+  grid-template-columns: 1fr;
+  gap: 4px;
 }
 
 button {
@@ -222,9 +241,12 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  height: 21px;
   border-color: rgba(49, 95, 155, 0.36);
   background: #edf3fb;
   color: #234a7a;
+  font-size: 0.72rem;
+  line-height: 1;
   text-decoration: none;
 }
 
@@ -431,12 +453,7 @@ footer a {
 
 @media (max-width: 1400px) {
   .controls {
-    grid-template-columns: minmax(220px, 1fr) minmax(200px, 0.85fr) minmax(220px, 1fr);
-  }
-
-  .sort-control,
-  .download-actions {
-    grid-column: span 2;
+    grid-template-columns: minmax(220px, 1fr) minmax(180px, 0.85fr) minmax(210px, 1fr) minmax(260px, 1.1fr) minmax(224px, auto);
   }
 }
 
@@ -447,7 +464,7 @@ footer a {
 
   .control-wide,
   .sort-control,
-  .download-actions {
+  .utility-actions {
     grid-column: 1 / -1;
   }
 }
@@ -607,7 +624,7 @@ footer a {
 
   .control-wide,
   .sort-control,
-  .download-actions {
+  .utility-actions {
     grid-column: auto;
   }
 

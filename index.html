@@ -44,12 +44,12 @@
           <input id="title-filter" type="search" autocomplete="off" placeholder="Journal name, JFE, RFS, restat">
         </label>
         <label class="control">
-          <span>Discipline or FoR</span>
+          <span>Discipline/FoR</span>
           <input id="discipline-filter" type="search" list="discipline-options" autocomplete="off" placeholder="Finance, economics, 3502">
           <datalist id="discipline-options"></datalist>
         </label>
         <label class="control">
-          <span>Publisher, ISSN, year, FoR</span>
+          <span>Publisher/Year/ISSN</span>
           <input id="detail-filter" type="search" autocomplete="off" placeholder="Elsevier, 0304, 1974, 3502">
         </label>
         <div class="sort-control" aria-label="Sort results">
@@ -68,14 +68,16 @@
             <button id="sort-direction" type="button" aria-label="Toggle sort direction">Descending ↓</button>
           </div>
         </div>
-        <div class="button-row actions" aria-label="Actions">
-          <button id="reset-filters" type="button">Reset</button>
-        </div>
-        <div class="download-actions" aria-label="Downloads">
-          <span>Download</span>
-          <div class="download-buttons">
-            <button id="download-csv" type="button">Filtered CSV</button>
-            <a href="https://abdc.edu.au/wp-content/uploads/2026/05/ABDC-JQL-2025-v2-270526.xlsx">Original XLSX</a>
+        <div class="utility-actions">
+          <div class="button-row actions" aria-label="Actions">
+            <button id="reset-filters" type="button">Reset</button>
+          </div>
+          <div class="download-actions" aria-label="Downloads">
+            <span>Download</span>
+            <div class="download-buttons">
+              <button id="download-csv" type="button">Filtered CSV</button>
+              <a href="https://abdc.edu.au/wp-content/uploads/2026/05/ABDC-JQL-2025-v2-270526.xlsx">Original XLSX</a>
+            </div>
           </div>
         </div>
       </section>
