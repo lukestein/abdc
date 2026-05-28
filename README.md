@@ -1,6 +1,17 @@
 # ABDC Journal Quality List 2025 Viewer
 
-Static single-page viewer for the 2025 ABDC Journal Quality List.
+A lightweight, static browser for the [ABDC Journal Quality List](https://abdc.edu.au/research/abdc-journal-quality-list/). It turns the 2025 workbook into a fast single-page lookup tool for journal names, disciplines, and quality ratings.
+
+![ABDC Journal Quality List viewer with an AEJ search and A/A* filters](docs/screenshot.png)
+
+## Features
+
+- Fast partial-title search, including acronym-style searches such as `AEJ`, `JFE`, `RFS`, `restud`, and `REStat`.
+- Text filtering for disciplines, publishers, ISSNs, years, and FoR codes.
+- Multi-select rating filters for `A*`, `A`, `B`, and `C`.
+- Sortable table columns with `A*` ranked above `A`.
+- Responsive mobile layout with compact journal cards.
+- Filtered CSV export plus a link to the original ABDC workbook.
 
 ## Files
 
