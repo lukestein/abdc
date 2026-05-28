@@ -192,24 +192,30 @@ function sortTextValue(row, key) {
   return key === "title" ? value.replace(leadingTitleArticles, "") : value;
 }
 
+function compareTitles(a, b) {
+  const sortDelta = sortTextValue(a, "title").localeCompare(sortTextValue(b, "title"));
+  if (sortDelta !== 0) return sortDelta;
+  return textValue(a, "title").localeCompare(textValue(b, "title"));
+}
+
 function compareRows(a, b) {
   const direction = state.sortDirection === "asc" ? 1 : -1;
 
   if (state.sortKey === "rating") {
     const ratingDelta = qualityValue(a) - qualityValue(b);
     if (ratingDelta !== 0) return ratingDelta * direction;
-    return a.title.localeCompare(b.title);
+    return compareTitles(a, b);
   }
 
   if (state.sortKey === "year") {
     const yearDelta = (Number(a.year) || 0) - (Number(b.year) || 0);
     if (yearDelta !== 0) return yearDelta * direction;
-    return a.title.localeCompare(b.title);
+    return compareTitles(a, b);
   }
 
   const textDelta = sortTextValue(a, state.sortKey).localeCompare(sortTextValue(b, state.sortKey));
   if (textDelta !== 0) return textDelta * direction;
-  return a.title.localeCompare(b.title);
+  return compareTitles(a, b);
 }
 
 function includesText(value, query) {
