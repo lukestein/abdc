@@ -451,7 +451,7 @@ footer {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 14px;
-  justify-content: space-between;
+  justify-content: flex-start;
   color: var(--muted);
   font-size: 0.85rem;
 }
@@ -459,6 +459,10 @@ footer {
 footer a {
   color: var(--accent-dark);
   font-weight: 720;
+}
+
+.credit-footer {
+  margin-top: 8px;
 }
 
 @media (max-width: 1400px) {
