@@ -7,6 +7,7 @@ const qualityOrder = new Map([
   ["C", 1],
 ]);
 const titleStopWords = new Set(["a", "an", "and", "for", "in", "of", "on", "the", "to"]);
+const leadingTitleArticles = /^(a|an|the)\s+/;
 const titleAliases = new Map([
   ["reviewofeconomicstudies", ["restud"]],
   ["thereviewofeconomicstudies", ["restud"]],
@@ -186,6 +187,11 @@ function textValue(row, key) {
   return normalize(row[key]);
 }
 
+function sortTextValue(row, key) {
+  const value = textValue(row, key);
+  return key === "title" ? value.replace(leadingTitleArticles, "") : value;
+}
+
 function compareRows(a, b) {
   const direction = state.sortDirection === "asc" ? 1 : -1;
 
@@ -201,7 +207,7 @@ function compareRows(a, b) {
     return a.title.localeCompare(b.title);
   }
 
-  const textDelta = textValue(a, state.sortKey).localeCompare(textValue(b, state.sortKey));
+  const textDelta = sortTextValue(a, state.sortKey).localeCompare(sortTextValue(b, state.sortKey));
   if (textDelta !== 0) return textDelta * direction;
   return a.title.localeCompare(b.title);
 }
