@@ -192,8 +192,12 @@ button:focus-visible {
 }
 
 .sort-control {
-  grid-template-columns: minmax(120px, 1fr) minmax(112px, auto);
+  grid-template-columns: minmax(120px, 1fr) 46px;
   align-items: end;
+}
+
+.sort-direction {
+  grid-template-columns: 1fr;
 }
 
 .utility-actions {
@@ -234,6 +238,12 @@ button {
   background: #eef7f5;
   color: var(--accent-dark);
   font-weight: 760;
+}
+
+.sort-direction button {
+  padding: 0;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .download-buttons button,
@@ -629,7 +639,7 @@ footer a {
   }
 
   .sort-control {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 46px;
   }
 
   .button-row {

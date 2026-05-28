@@ -236,7 +236,8 @@ function updateSortHeaders() {
 function updateSortControls() {
   els.sortKey.value = state.sortKey;
   const isAscending = state.sortDirection === "asc";
-  els.sortDirection.textContent = isAscending ? "Ascending ↑" : "Descending ↓";
+  els.sortDirection.textContent = isAscending ? "↑" : "↓";
+  els.sortDirection.title = isAscending ? "Sorted ascending" : "Sorted descending";
   els.sortDirection.setAttribute("aria-label", `Sort ${isAscending ? "descending" : "ascending"}`);
 }
 
