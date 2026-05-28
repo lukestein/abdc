@@ -2,6 +2,8 @@
 
 A lightweight, static browser for the [ABDC Journal Quality List](https://abdc.edu.au/abdc-journal-quality-list/). It turns the workbook into a fast single-page lookup tool for journal names, disciplines, and quality ratings.
 
+The page is available as a public website at [lukestein.com/abdc](https://lukestein.com/abdc/)
+
 ![ABDC Journal Quality List viewer with an AEJ search and A/A* filters](docs/screenshot.png)
 
 ## Features
