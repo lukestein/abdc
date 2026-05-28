@@ -227,10 +227,43 @@ function includesText(value, query) {
   return normalize(value).includes(query);
 }
 
+function splitCommaQueries(query) {
+  const parts = [];
+  let part = "";
+  let inQuotes = false;
+
+  for (const char of String(query ?? "")) {
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    }
+
+    if (char === "," && !inQuotes) {
+      parts.push(part);
+      part = "";
+    } else {
+      part += char;
+    }
+  }
+
+  parts.push(part);
+  return parts;
+}
+
 function commaQueries(query) {
-  return normalize(query)
-    .split(",")
+  return splitCommaQueries(query)
+    .map((part) => normalize(part))
     .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function titleQueries(query) {
+  return splitCommaQueries(query)
+    .map((part) => {
+      const value = normalize(part);
+      const isExact = value.length >= 2 && value.startsWith('"') && value.endsWith('"');
+      const text = isExact ? value.slice(1, -1).trim() : value.trim();
+      return text ? { text, isExact } : null;
+    })
     .filter(Boolean);
 }
 
@@ -256,9 +289,21 @@ function titleMatches(row, query) {
   );
 }
 
-function titleMatchesAny(row, query) {
-  const queries = commaQueries(query);
-  return queries.length === 0 || queries.some((part) => titleMatches(row, part));
+function exactTitleValue(value) {
+  return normalize(value).replace(leadingTitleArticles, "");
+}
+
+function exactTitleMatches(row, query) {
+  return exactTitleValue(row.title) === exactTitleValue(query) || searchCompact(row.title) === searchCompact(query);
+}
+
+function titleMatchesQuery(row, query) {
+  return query.isExact ? exactTitleMatches(row, query.text) : titleMatches(row, query.text);
+}
+
+function titleMatchesAny(row, queryText) {
+  const queries = titleQueries(queryText);
+  return queries.length === 0 || queries.some((query) => titleMatchesQuery(row, query));
 }
 
 function includesAnyText(value, query) {
