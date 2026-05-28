@@ -14,14 +14,25 @@ const titleAliases = new Map([
   ["thereviewofeconomicsandstatistics", ["restat"]],
 ]);
 const titleAliasQueries = new Set([...titleAliases.values()].flat());
+const defaultSortKey = "rating";
+const defaultSortDirection = "desc";
+const sortKeys = new Set(["title", "rating", "discipline", "publisher", "year", "issn"]);
+const sortDirections = new Set(["asc", "desc"]);
+const ratingToParam = new Map([
+  ["A*", "Astar"],
+  ["A", "A"],
+  ["B", "B"],
+  ["C", "C"],
+]);
+const paramToRating = new Map([...ratingToParam].map(([rating, param]) => [param.toLowerCase(), rating]));
 
 const state = {
   title: "",
   discipline: "",
   ratings: new Set(),
   detail: "",
-  sortKey: "rating",
-  sortDirection: "desc",
+  sortKey: defaultSortKey,
+  sortDirection: defaultSortDirection,
   filtered: [],
 };
 
@@ -47,6 +58,74 @@ const els = {
 
 function normalize(value) {
   return String(value ?? "").toLowerCase().trim();
+}
+
+function readRatingParams(params) {
+  return params
+    .getAll("rating")
+    .flatMap((value) => value.split(","))
+    .map((value) => paramToRating.get(value.trim().toLowerCase()))
+    .filter(Boolean);
+}
+
+function readUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  const sortKey = normalize(params.get("sort"));
+  const sortDirection = normalize(params.get("dir"));
+  const nextSortKey = sortKeys.has(sortKey) ? sortKey : defaultSortKey;
+
+  state.title = normalize(params.get("title"));
+  state.discipline = normalize(params.get("field"));
+  state.detail = normalize(params.get("detail"));
+  state.ratings = new Set(readRatingParams(params));
+  state.sortKey = nextSortKey;
+  state.sortDirection = sortDirections.has(sortDirection) ? sortDirection : defaultSortDirectionFor(nextSortKey);
+}
+
+function syncControlsFromState() {
+  els.titleFilter.value = state.title;
+  els.disciplineFilter.value = state.discipline;
+  els.detailFilter.value = state.detail;
+}
+
+function addParam(parts, key, value) {
+  if (!value) return;
+  parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+}
+
+function urlFromState() {
+  const parts = [];
+  addParam(parts, "title", state.title);
+  addParam(parts, "field", state.discipline);
+  addParam(parts, "detail", state.detail);
+
+  for (const rating of ["A*", "A", "B", "C"]) {
+    if (state.ratings.has(rating)) addParam(parts, "rating", ratingToParam.get(rating));
+  }
+
+  if (state.sortKey !== defaultSortKey) addParam(parts, "sort", state.sortKey);
+  if (state.sortDirection !== defaultSortDirectionFor(state.sortKey)) addParam(parts, "dir", state.sortDirection);
+
+  const query = parts.length ? `?${parts.join("&")}` : "";
+  return `${window.location.pathname}${query}`;
+}
+
+function defaultSortDirectionFor(key) {
+  return key === "rating" || key === "year" ? defaultSortDirection : "asc";
+}
+
+function replaceUrlFromState() {
+  const nextUrl = urlFromState();
+  const currentUrl = `${window.location.pathname}${window.location.search}`;
+  if (nextUrl !== currentUrl) {
+    window.history.replaceState(null, "", `${nextUrl}${window.location.hash}`);
+  }
+}
+
+let pendingUrlUpdate = 0;
+function scheduleUrlUpdate(delay = 0) {
+  window.clearTimeout(pendingUrlUpdate);
+  pendingUrlUpdate = window.setTimeout(replaceUrlFromState, delay);
 }
 
 function searchCompact(value) {
@@ -258,6 +337,11 @@ function scheduleUpdate() {
   pendingFrame = requestAnimationFrame(applyState);
 }
 
+function updateState(options = {}) {
+  scheduleUpdate();
+  scheduleUrlUpdate(options.urlDelay ?? 0);
+}
+
 function applyState() {
   const availableRows = data.filter(rowMatchesSearchFilters);
   state.filtered = availableRows.filter(rowMatches).sort(compareRows);
@@ -273,22 +357,22 @@ function setSort(key) {
     state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
   } else {
     state.sortKey = key;
-    state.sortDirection = key === "rating" || key === "year" ? "desc" : "asc";
+    state.sortDirection = defaultSortDirectionFor(key);
   }
-  scheduleUpdate();
+  updateState();
 }
 
 function setSortKey(key) {
   if (state.sortKey !== key) {
     state.sortKey = key;
-    state.sortDirection = key === "rating" || key === "year" ? "desc" : "asc";
-    scheduleUpdate();
+    state.sortDirection = defaultSortDirectionFor(key);
+    updateState();
   }
 }
 
 function toggleSortDirection() {
   state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
-  scheduleUpdate();
+  updateState();
 }
 
 function resetFilters() {
@@ -299,7 +383,7 @@ function resetFilters() {
   els.titleFilter.value = "";
   els.disciplineFilter.value = "";
   els.detailFilter.value = "";
-  scheduleUpdate();
+  updateState();
 }
 
 function csvValue(value) {
@@ -344,17 +428,17 @@ function populateDisciplines() {
 function bindEvents() {
   els.titleFilter.addEventListener("input", (event) => {
     state.title = normalize(event.target.value);
-    scheduleUpdate();
+    updateState({ urlDelay: 350 });
   });
 
   els.disciplineFilter.addEventListener("input", (event) => {
     state.discipline = normalize(event.target.value);
-    scheduleUpdate();
+    updateState({ urlDelay: 350 });
   });
 
   els.detailFilter.addEventListener("input", (event) => {
     state.detail = normalize(event.target.value);
-    scheduleUpdate();
+    updateState({ urlDelay: 350 });
   });
 
   els.resetFilters.addEventListener("click", resetFilters);
@@ -373,11 +457,19 @@ function bindEvents() {
       } else {
         state.ratings.add(pill.dataset.rating);
       }
-      scheduleUpdate();
+      updateState();
     });
   }
 }
 
+window.addEventListener("popstate", () => {
+  readUrlState();
+  syncControlsFromState();
+  scheduleUpdate();
+});
+
 populateDisciplines();
+readUrlState();
+syncControlsFromState();
 bindEvents();
 applyState();
