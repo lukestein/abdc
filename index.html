@@ -52,6 +52,22 @@
           <span>Publisher, ISSN, FoR</span>
           <input id="detail-filter" type="search" autocomplete="off" placeholder="Any text">
         </label>
+        <div class="sort-control" aria-label="Sort results">
+          <label class="control" for="sort-key">
+            <span>Sort results</span>
+            <select id="sort-key">
+              <option value="rating">Rating</option>
+              <option value="title">Journal</option>
+              <option value="discipline">Discipline</option>
+              <option value="publisher">Publisher</option>
+              <option value="year">Year</option>
+              <option value="issn">ISSN</option>
+            </select>
+          </label>
+          <div class="button-row sort-direction">
+            <button id="sort-direction" type="button" aria-label="Toggle sort direction">Descending ↓</button>
+          </div>
+        </div>
         <div class="button-row actions" aria-label="Actions">
           <button id="reset-filters" type="button">Reset</button>
         </div>
