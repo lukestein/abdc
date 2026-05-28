@@ -139,13 +139,14 @@ footer {
 
 .controls {
   display: grid;
-  grid-template-columns: minmax(260px, 1.35fr) minmax(220px, 1fr) minmax(220px, 0.9fr) auto minmax(250px, auto);
+  grid-template-columns: minmax(260px, 1.35fr) minmax(220px, 1fr) minmax(220px, 0.9fr) minmax(210px, 0.75fr) auto minmax(250px, auto);
   gap: 12px;
   align-items: end;
   padding: 16px;
 }
 
 .control,
+.sort-control,
 .download-actions {
   display: grid;
   gap: 7px;
@@ -194,11 +195,17 @@ button:focus-visible {
   grid-template-columns: repeat(2, minmax(112px, 1fr));
 }
 
+.sort-control {
+  grid-template-columns: minmax(0, 1fr) minmax(112px, auto);
+  align-items: end;
+}
+
 button {
   cursor: pointer;
 }
 
 .button-row button,
+.sort-direction button,
 .download-buttons button,
 .download-buttons a,
 .rating-pill {
@@ -218,6 +225,7 @@ button {
 }
 
 .button-row button:hover,
+.sort-direction button:hover,
 .download-buttons button:hover,
 .download-buttons a:hover,
 .rating-pill:hover {
@@ -414,12 +422,23 @@ footer a {
   font-weight: 720;
 }
 
+@media (max-width: 1400px) {
+  .controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .download-actions {
+    grid-column: span 2;
+  }
+}
+
 @media (max-width: 1180px) {
   .controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .control-wide,
+  .sort-control,
   .download-actions {
     grid-column: 1 / -1;
   }
@@ -579,8 +598,13 @@ footer a {
   }
 
   .control-wide,
+  .sort-control,
   .download-actions {
     grid-column: auto;
+  }
+
+  .sort-control {
+    grid-template-columns: 1fr;
   }
 
   .button-row {

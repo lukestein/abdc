@@ -34,6 +34,8 @@ const els = {
   titleFilter: document.querySelector("#title-filter"),
   disciplineFilter: document.querySelector("#discipline-filter"),
   detailFilter: document.querySelector("#detail-filter"),
+  sortKey: document.querySelector("#sort-key"),
+  sortDirection: document.querySelector("#sort-direction"),
   resetFilters: document.querySelector("#reset-filters"),
   downloadCsv: document.querySelector("#download-csv"),
   resultsBody: document.querySelector("#results-body"),
@@ -231,6 +233,13 @@ function updateSortHeaders() {
   }
 }
 
+function updateSortControls() {
+  els.sortKey.value = state.sortKey;
+  const isAscending = state.sortDirection === "asc";
+  els.sortDirection.textContent = isAscending ? "Ascending ↑" : "Descending ↓";
+  els.sortDirection.setAttribute("aria-label", `Sort ${isAscending ? "descending" : "ascending"}`);
+}
+
 function updateRatingPills() {
   for (const pill of els.ratingPills) {
     const isActive = state.ratings.has(pill.dataset.rating);
@@ -250,6 +259,7 @@ function applyState() {
   renderRows(state.filtered);
   updateMetrics(state.filtered);
   updateSortHeaders();
+  updateSortControls();
   updateRatingPills();
 }
 
@@ -260,6 +270,19 @@ function setSort(key) {
     state.sortKey = key;
     state.sortDirection = key === "rating" || key === "year" ? "desc" : "asc";
   }
+  scheduleUpdate();
+}
+
+function setSortKey(key) {
+  if (state.sortKey !== key) {
+    state.sortKey = key;
+    state.sortDirection = key === "rating" || key === "year" ? "desc" : "asc";
+    scheduleUpdate();
+  }
+}
+
+function toggleSortDirection() {
+  state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
   scheduleUpdate();
 }
 
@@ -331,6 +354,8 @@ function bindEvents() {
 
   els.resetFilters.addEventListener("click", resetFilters);
   els.downloadCsv.addEventListener("click", downloadCsv);
+  els.sortKey.addEventListener("change", (event) => setSortKey(event.target.value));
+  els.sortDirection.addEventListener("click", toggleSortDirection);
 
   for (const button of els.sortButtons) {
     button.addEventListener("click", () => setSort(button.dataset.sort));
