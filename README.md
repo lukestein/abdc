@@ -11,6 +11,7 @@ The page is available as a public website at [lukestein.com/abdc](https://lukest
 - Fast partial-title search, including acronym-style searches such as `AEJ`, `JFE`, `RFS`, `restud`, and `REStat`.
 - Text filtering for disciplines, publishers, ISSNs, years, and FoR codes.
 - Multi-select rating filters for `A*`, `A`, `B`, and `C`.
+- Visible `FT50` badges and a filter for the April 2026 Financial Times Top 50 journal list.
 - Sortable table columns with `A*` ranked above `A`.
 - Responsive mobile layout with compact journal cards.
 - Filtered CSV export plus a link to the original ABDC workbook.
