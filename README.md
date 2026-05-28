@@ -9,7 +9,7 @@ The page is available as a public website at [lukestein.com/abdc](https://lukest
 ## Features
 
 - Fast partial-title search, including acronym-style searches such as `AEJ`, `JFE`, `RFS`, `restud`, and `REStat`.
-- Text filtering for disciplines, publishers, ISSNs, years, and FoR codes.
+- Comma-separated title, discipline, publisher, ISSN, year, and FoR searches that return the union of matches within each field.
 - Multi-select rating filters for `A*`, `A`, `B`, and `C`.
 - Visible `FT50` badges and a filter for the April 2026 Financial Times Top 50 journal list.
 - Sortable table columns with `A*` ranked above `A`.

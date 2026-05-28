@@ -226,6 +226,13 @@ function includesText(value, query) {
   return normalize(value).includes(query);
 }
 
+function commaQueries(query) {
+  return normalize(query)
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 function titleMatches(row, query) {
   if (!query) return true;
   const compactQuery = searchCompact(query);
@@ -241,15 +248,25 @@ function titleMatches(row, query) {
   );
 }
 
+function titleMatchesAny(row, query) {
+  const queries = commaQueries(query);
+  return queries.length === 0 || queries.some((part) => titleMatches(row, part));
+}
+
+function includesAnyText(value, query) {
+  const queries = commaQueries(query);
+  return queries.length === 0 || queries.some((part) => includesText(value, part));
+}
+
 function rowMatchesSearchFilters(row) {
-  if (!titleMatches(row, state.title)) return false;
+  if (!titleMatchesAny(row, state.title)) return false;
   if (state.discipline) {
     const target = `${row.discipline} ${row.forCode}`;
-    if (!includesText(target, state.discipline)) return false;
+    if (!includesAnyText(target, state.discipline)) return false;
   }
   if (state.detail) {
     const target = `${row.publisher} ${row.issn} ${row.issnOnline} ${row.forCode} ${row.year} ${row.ft50 ? "FT50" : ""}`;
-    if (!includesText(target, state.detail)) return false;
+    if (!includesAnyText(target, state.detail)) return false;
   }
   return true;
 }
