@@ -176,6 +176,7 @@ function buildTitleSearchTokens(title) {
   return {
     text: [...textTokens].filter(Boolean),
     code: [...codeTokens].filter(Boolean),
+    words,
   };
 }
 
@@ -238,7 +239,14 @@ function titleMatches(row, query) {
   const compactQuery = searchCompact(query);
   const isShortCode = compactQuery.length <= 3 && /^[a-z]+$/.test(compactQuery) && !query.includes(" ");
 
-  if (isShortCode || titleAliasQueries.has(compactQuery)) {
+  if (isShortCode) {
+    return (
+      row.titleSearch.code.some((token) => token === compactQuery) ||
+      row.titleSearch.words.some((word) => word === compactQuery)
+    );
+  }
+
+  if (titleAliasQueries.has(compactQuery)) {
     return row.titleSearch.code.some((token) => token === compactQuery);
   }
 
