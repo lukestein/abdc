@@ -31,6 +31,7 @@ const state = {
   title: "",
   discipline: "",
   ratings: new Set(),
+  ft50Only: false,
   detail: "",
   sortKey: defaultSortKey,
   sortDirection: defaultSortDirection,
@@ -41,8 +42,8 @@ const els = {
   totalCount: document.querySelector("#total-count"),
   visibleCount: document.querySelector("#visible-count"),
   astarCount: document.querySelector("#astar-count"),
+  ft50Count: document.querySelector("#ft50-count"),
   disciplineCount: document.querySelector("#discipline-count"),
-  activeSort: document.querySelector("#active-sort"),
   titleFilter: document.querySelector("#title-filter"),
   disciplineFilter: document.querySelector("#discipline-filter"),
   detailFilter: document.querySelector("#detail-filter"),
@@ -54,7 +55,8 @@ const els = {
   emptyState: document.querySelector("#empty-state"),
   disciplineOptions: document.querySelector("#discipline-options"),
   sortButtons: [...document.querySelectorAll("[data-sort]")],
-  ratingPills: [...document.querySelectorAll(".rating-pill")],
+  ratingPills: [...document.querySelectorAll("[data-rating]")],
+  ft50Pill: document.querySelector("#ft50-pill"),
 };
 
 function normalize(value) {
@@ -79,6 +81,7 @@ function readUrlState() {
   state.discipline = normalize(params.get("field"));
   state.detail = normalize(params.get("detail"));
   state.ratings = new Set(readRatingParams(params));
+  state.ft50Only = ["1", "true", "yes"].includes(normalize(params.get("ft50")));
   state.sortKey = nextSortKey;
   state.sortDirection = sortDirections.has(sortDirection) ? sortDirection : defaultSortDirectionFor(nextSortKey);
 }
@@ -103,6 +106,7 @@ function urlFromState() {
   for (const rating of ["A*", "A", "B", "C"]) {
     if (state.ratings.has(rating)) addParam(parts, "rating", ratingToParam.get(rating));
   }
+  if (state.ft50Only) addParam(parts, "ft50", "1");
 
   if (state.sortKey !== defaultSortKey) addParam(parts, "sort", state.sortKey);
   if (state.sortDirection !== defaultSortDirectionFor(state.sortKey)) addParam(parts, "dir", state.sortDirection);
@@ -244,14 +248,18 @@ function rowMatchesSearchFilters(row) {
     if (!includesText(target, state.discipline)) return false;
   }
   if (state.detail) {
-    const target = `${row.publisher} ${row.issn} ${row.issnOnline} ${row.forCode} ${row.year}`;
+    const target = `${row.publisher} ${row.issn} ${row.issnOnline} ${row.forCode} ${row.year} ${row.ft50 ? "FT50" : ""}`;
     if (!includesText(target, state.detail)) return false;
   }
   return true;
 }
 
 function rowMatches(row) {
-  return rowMatchesSearchFilters(row) && (!state.ratings.size || state.ratings.has(row.rating));
+  return (
+    rowMatchesSearchFilters(row) &&
+    (!state.ratings.size || state.ratings.has(row.rating)) &&
+    (!state.ft50Only || row.ft50)
+  );
 }
 
 function badgeClass(rating) {
@@ -265,7 +273,7 @@ function renderRows(rows) {
   for (const row of rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td class="journal-title" data-label="Journal">${escapeHtml(row.title)}</td>
+      <td class="journal-title" data-label="Journal"><span class="journal-name">${escapeHtml(row.title)}</span>${row.ft50 ? ` <span class="ft50-chip" title="Financial Times Top 50 journal">FT50</span>` : ""}</td>
       <td data-label="Rating"><span class="badge ${badgeClass(row.rating)}">${escapeHtml(row.rating)}</span></td>
       <td class="discipline" data-label="Discipline">${escapeHtml(row.discipline)} <span class="for-code">(FoR ${escapeHtml(row.forCode)})</span></td>
       <td class="publisher" data-label="Publisher">${escapeHtml(row.publisher)}</td>
@@ -288,22 +296,26 @@ function escapeHtml(value) {
 
 function updateMetrics(rows, availableRows) {
   const astar = rows.filter((row) => row.rating === "A*").length;
+  const ft50Shown = rows.filter((row) => row.ft50).length;
   const disciplines = new Set(rows.map((row) => row.discipline)).size;
   const distribution = { "A*": 0, A: 0, B: 0, C: 0 };
+  let ft50Available = 0;
 
   for (const row of availableRows) {
     distribution[row.rating] = (distribution[row.rating] ?? 0) + 1;
+    if (row.ft50) ft50Available += 1;
   }
 
   els.totalCount.textContent = numberFormat.format(data.length);
   els.visibleCount.textContent = numberFormat.format(rows.length);
   els.astarCount.textContent = numberFormat.format(astar);
+  els.ft50Count.textContent = numberFormat.format(ft50Shown);
   els.disciplineCount.textContent = numberFormat.format(disciplines);
-  els.activeSort.textContent = `${sortLabel(state.sortKey)} ${state.sortDirection === "asc" ? "↑" : "↓"}`;
   document.querySelector("#pill-astar").textContent = numberFormat.format(distribution["A*"]);
   document.querySelector("#pill-a").textContent = numberFormat.format(distribution.A);
   document.querySelector("#pill-b").textContent = numberFormat.format(distribution.B);
   document.querySelector("#pill-c").textContent = numberFormat.format(distribution.C);
+  document.querySelector("#pill-ft50").textContent = numberFormat.format(ft50Available);
 }
 
 function sortLabel(key) {
@@ -341,6 +353,8 @@ function updateRatingPills() {
     pill.classList.toggle("is-active", isActive);
     pill.setAttribute("aria-pressed", String(isActive));
   }
+  els.ft50Pill.classList.toggle("is-active", state.ft50Only);
+  els.ft50Pill.setAttribute("aria-pressed", String(state.ft50Only));
 }
 
 let pendingFrame = 0;
@@ -391,6 +405,7 @@ function resetFilters() {
   state.title = "";
   state.discipline = "";
   state.ratings.clear();
+  state.ft50Only = false;
   state.detail = "";
   els.titleFilter.value = "";
   els.disciplineFilter.value = "";
@@ -405,10 +420,11 @@ function csvValue(value) {
 }
 
 function downloadCsv() {
-  const header = ["Journal Title", "Rating", "Discipline", "FoR", "Publisher", "ISSN", "ISSN Online", "Year Inception"];
+  const header = ["Journal Title", "Rating", "FT50", "Discipline", "FoR", "Publisher", "ISSN", "ISSN Online", "Year Inception"];
   const rows = state.filtered.map((row) => [
     row.title,
     row.rating,
+    row.ft50 ? "Yes" : "",
     row.discipline,
     row.forCode,
     row.publisher,
@@ -455,6 +471,10 @@ function bindEvents() {
 
   els.resetFilters.addEventListener("click", resetFilters);
   els.downloadCsv.addEventListener("click", downloadCsv);
+  els.ft50Pill.addEventListener("click", () => {
+    state.ft50Only = !state.ft50Only;
+    updateState();
+  });
   els.sortKey.addEventListener("change", (event) => setSortKey(event.target.value));
   els.sortDirection.addEventListener("click", toggleSortDirection);
 

@@ -34,6 +34,65 @@ FOR_LABELS = {
     "4905": "Statistics",
 }
 
+FT50_SOURCE = "https://www.ft.com/ft50-journals"
+FT50_UPDATED = "2026-04"
+FT50_JOURNALS = [
+    "Academy of Management Annals",
+    "Academy of Management Journal",
+    "Academy of Management Review",
+    "Accounting, Organizations and Society",
+    "Accounting Review",
+    "Administrative Science Quarterly",
+    "American Economic Review",
+    "American Sociological Review",
+    "Contemporary Accounting Research",
+    "Econometrica",
+    "Entrepreneurship Theory and Practice",
+    "Harvard Business Review",
+    "Human Resource Management",
+    "Information Systems Research",
+    "Journal of Accounting and Economics",
+    "Journal of Accounting Research",
+    "Journal of Applied Psychology",
+    "Journal of Business Venturing",
+    "Journal of Consumer Psychology",
+    "Journal of Consumer Research",
+    "Journal of Finance",
+    "Journal of Financial and Quantitative Analysis",
+    "Journal of Financial Economics",
+    "Journal of International Business Studies",
+    "Journal of Management",
+    "Journal of Management Information Systems",
+    "Journal of Management Studies",
+    "Journal of Marketing",
+    "Journal of Marketing Research",
+    "Journal of Operations Management",
+    "Journal of Political Economy",
+    "Journal of Retailing",
+    "Strategic Entrepreneurship Journal",
+    "Journal of Organizational Behavior",
+    "Leadership Quarterly",
+    "Management Information Systems Quarterly",
+    "Management Science",
+    "Manufacturing & Service Operations Management",
+    "Marketing Science",
+    "Operations Research",
+    "Organization Science",
+    "Organizational Behavior and Human Decision Processes",
+    "Personnel Psychology",
+    "Psychological Science",
+    "Quarterly Journal of Economics",
+    "Review of Accounting Studies",
+    "Review of Economic Studies",
+    "Review of Finance",
+    "Review of Financial Studies",
+    "Strategic Management Journal",
+]
+FT50_ALIASES = {
+    "humanresourcemanagement": "humanresourcemanagementus",
+    "managementinformationsystemsquarterly": "misquarterly",
+}
+
 
 def col_index(cell_ref):
     letters = re.sub(r"[^A-Z]", "", cell_ref.upper())
@@ -45,6 +104,12 @@ def col_index(cell_ref):
 
 def clean(value):
     return re.sub(r"\s+", " ", str(value or "").replace("\t", " ")).strip()
+
+
+def journal_key(value):
+    text = clean(value).lower().replace("&", " and ")
+    text = re.sub(r"^(a|an|the)\s+", "", text)
+    return re.sub(r"[^a-z0-9]", "", text)
 
 
 def load_shared_strings(zip_file):
@@ -102,17 +167,44 @@ def extract_rows():
     return rows
 
 
+def mark_ft50_rows(rows):
+    rows_by_key = {journal_key(row["title"]): row for row in rows}
+    matched = []
+    missing = []
+
+    for title in FT50_JOURNALS:
+        key = journal_key(title)
+        target_key = FT50_ALIASES.get(key, key)
+        row = rows_by_key.get(target_key)
+        if row is None:
+            missing.append(title)
+            continue
+        row["ft50"] = True
+        matched.append(row)
+
+    if missing:
+        raise SystemExit(f"Could not match FT50 journals: {', '.join(missing)}")
+    if len({row["title"] for row in matched}) != len(FT50_JOURNALS):
+        raise SystemExit("FT50 matching did not produce 50 unique ABDC rows")
+
+    return matched
+
+
 def main():
     rows = extract_rows()
     unknown_codes = sorted({row["forCode"] for row in rows if row["discipline"] == row["forCode"]})
     if unknown_codes:
         raise SystemExit(f"Missing FoR labels for: {', '.join(unknown_codes)}")
 
+    ft50_rows = mark_ft50_rows(rows)
     payload = {
         "source": "https://abdc.edu.au/wp-content/uploads/2026/05/ABDC-JQL-2025-v2-270526.xlsx",
         "downloaded": "2026-05-27",
         "sheet": "2025 JQL",
         "count": len(rows),
+        "ft50Source": FT50_SOURCE,
+        "ft50Updated": FT50_UPDATED,
+        "ft50Count": len(ft50_rows),
         "rows": rows,
     }
     OUTPUT.write_text(
