@@ -1,6 +1,6 @@
 # ABDC Journal Quality List 2025 Viewer
 
-A lightweight, static browser for the [ABDC Journal Quality List](https://abdc.edu.au/research/abdc-journal-quality-list/). It turns the 2025 workbook into a fast single-page lookup tool for journal names, disciplines, and quality ratings.
+A lightweight, static browser for the [ABDC Journal Quality List](https://abdc.edu.au/abdc-journal-quality-list/). It turns the workbook into a fast single-page lookup tool for journal names, disciplines, and quality ratings.
 
 ![ABDC Journal Quality List viewer with an AEJ search and A/A* filters](docs/screenshot.png)
 
