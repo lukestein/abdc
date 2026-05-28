@@ -171,10 +171,10 @@ function renderRows(rows) {
     tr.innerHTML = `
       <td class="journal-title" data-label="Journal">${escapeHtml(row.title)}</td>
       <td data-label="Rating"><span class="badge ${badgeClass(row.rating)}">${escapeHtml(row.rating)}</span></td>
-      <td class="discipline" data-label="Discipline">${escapeHtml(row.discipline)}<span class="for-code">FoR ${escapeHtml(row.forCode)}</span></td>
+      <td class="discipline" data-label="Discipline">${escapeHtml(row.discipline)} <span class="for-code">(FoR ${escapeHtml(row.forCode)})</span></td>
       <td class="publisher" data-label="Publisher">${escapeHtml(row.publisher)}</td>
       <td data-label="Year">${escapeHtml(row.year)}</td>
-      <td class="issn" data-label="ISSN">${escapeHtml(row.issn)}${row.issnOnline ? `<br>${escapeHtml(row.issnOnline)}` : ""}</td>
+      <td class="issn" data-label="ISSN">${escapeHtml(row.issn)}${row.issnOnline ? `<span class="issn-separator"> / </span>${escapeHtml(row.issnOnline)}` : ""}</td>
     `;
     fragment.appendChild(tr);
   }
