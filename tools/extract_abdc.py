@@ -93,6 +93,38 @@ FT50_ALIASES = {
     "managementinformationsystemsquarterly": "misquarterly",
 }
 
+UTD24_SOURCE = "https://jsom.utdallas.edu/the-utd-top-100-business-school-research-rankings/"
+UTD24_UPDATED = "2026-06"
+UTD24_JOURNALS = [
+    "The Accounting Review",
+    "Journal of Accounting and Economics",
+    "Journal of Accounting Research",
+    "Journal of Finance",
+    "Journal of Financial Economics",
+    "The Review of Financial Studies",
+    "Information Systems Research",
+    "Journal on Computing",
+    "MIS Quarterly",
+    "Journal of Consumer Research",
+    "Journal of Marketing",
+    "Journal of Marketing Research",
+    "Marketing Science",
+    "Management Science",
+    "Operations Research",
+    "Journal of Operations Management",
+    "Manufacturing and Service Operations Management",
+    "Production and Operations Management",
+    "Academy of Management Journal",
+    "Academy of Management Review",
+    "Administrative Science Quarterly",
+    "Organization Science",
+    "Journal of International Business Studies",
+    "Strategic Management Journal",
+]
+UTD24_ALIASES = {
+    "journaloncomputing": "informsjournaloncomputing",
+}
+
 
 def col_index(cell_ref):
     letters = re.sub(r"[^A-Z]", "", cell_ref.upper())
@@ -168,24 +200,32 @@ def extract_rows():
 
 
 def mark_ft50_rows(rows):
+    return mark_journal_list_rows(rows, FT50_JOURNALS, "ft50", FT50_ALIASES, "FT50")
+
+
+def mark_utd24_rows(rows):
+    return mark_journal_list_rows(rows, UTD24_JOURNALS, "utd24", UTD24_ALIASES, "UTD24")
+
+
+def mark_journal_list_rows(rows, journal_titles, field, aliases, label):
     rows_by_key = {journal_key(row["title"]): row for row in rows}
     matched = []
     missing = []
 
-    for title in FT50_JOURNALS:
+    for title in journal_titles:
         key = journal_key(title)
-        target_key = FT50_ALIASES.get(key, key)
+        target_key = aliases.get(key, key)
         row = rows_by_key.get(target_key)
         if row is None:
             missing.append(title)
             continue
-        row["ft50"] = True
+        row[field] = True
         matched.append(row)
 
     if missing:
-        raise SystemExit(f"Could not match FT50 journals: {', '.join(missing)}")
-    if len({row["title"] for row in matched}) != len(FT50_JOURNALS):
-        raise SystemExit("FT50 matching did not produce 50 unique ABDC rows")
+        raise SystemExit(f"Could not match {label} journals: {', '.join(missing)}")
+    if len({row["title"] for row in matched}) != len(journal_titles):
+        raise SystemExit(f"{label} matching did not produce {len(journal_titles)} unique ABDC rows")
 
     return matched
 
@@ -197,6 +237,7 @@ def main():
         raise SystemExit(f"Missing FoR labels for: {', '.join(unknown_codes)}")
 
     ft50_rows = mark_ft50_rows(rows)
+    utd24_rows = mark_utd24_rows(rows)
     payload = {
         "source": "https://abdc.edu.au/wp-content/uploads/2026/05/ABDC-JQL-2025-v2-270526.xlsx",
         "downloaded": "2026-05-27",
@@ -205,6 +246,9 @@ def main():
         "ft50Source": FT50_SOURCE,
         "ft50Updated": FT50_UPDATED,
         "ft50Count": len(ft50_rows),
+        "utd24Source": UTD24_SOURCE,
+        "utd24Updated": UTD24_UPDATED,
+        "utd24Count": len(utd24_rows),
         "rows": rows,
     }
     OUTPUT.write_text(

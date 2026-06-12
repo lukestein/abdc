@@ -275,7 +275,7 @@ button {
 
 .rating-strip {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
   padding: 12px;
 }
@@ -293,17 +293,20 @@ button {
   color: #fff;
 }
 
-.ft50-pill {
+.ft50-pill,
+.utd24-pill {
   border-color: rgba(201, 139, 33, 0.42);
   background: #fbf2dd;
   color: #7a4f0f;
 }
 
-.ft50-pill:hover {
+.ft50-pill:hover,
+.utd24-pill:hover {
   background: #f5e5c1;
 }
 
-.ft50-pill.is-active {
+.ft50-pill.is-active,
+.utd24-pill.is-active {
   background: var(--gold);
   color: #fff;
 }
@@ -413,7 +416,7 @@ tbody tr:hover {
   vertical-align: middle;
 }
 
-.ft50-chip {
+.journal-list-chip {
   display: inline-flex;
   align-items: center;
   height: 22px;
