@@ -17,8 +17,10 @@ const titleAliases = new Map([
 const titleAliasQueries = new Set([...titleAliases.values()].flat());
 const defaultSortKey = "rating";
 const defaultSortDirection = "desc";
+const defaultTextMatchMode = "all";
 const sortKeys = new Set(["title", "rating", "discipline", "publisher", "year", "issn"]);
 const sortDirections = new Set(["asc", "desc"]);
+const textMatchModes = new Set([defaultTextMatchMode, "any"]);
 const ratingToParam = new Map([
   ["A*", "Astar"],
   ["A", "A"],
@@ -34,6 +36,7 @@ const state = {
   ft50Only: false,
   utd24Only: false,
   detail: "",
+  textMatchMode: defaultTextMatchMode,
   sortKey: defaultSortKey,
   sortDirection: defaultSortDirection,
   filtered: [],
@@ -47,6 +50,8 @@ const els = {
   disciplineCount: document.querySelector("#discipline-count"),
   titleFilter: document.querySelector("#title-filter"),
   disciplineFilter: document.querySelector("#discipline-filter"),
+  textMatchToggle: document.querySelector("#text-match-toggle"),
+  textMatchValue: document.querySelector("#text-match-value"),
   detailFilter: document.querySelector("#detail-filter"),
   sortKey: document.querySelector("#sort-key"),
   sortDirection: document.querySelector("#sort-direction"),
@@ -85,6 +90,7 @@ function readUrlState() {
   state.ratings = new Set(readRatingParams(params));
   state.ft50Only = ["1", "true", "yes"].includes(normalize(params.get("ft50")));
   state.utd24Only = ["1", "true", "yes"].includes(normalize(params.get("utd24")));
+  state.textMatchMode = textMatchModes.has(normalize(params.get("match"))) ? normalize(params.get("match")) : defaultTextMatchMode;
   state.sortKey = nextSortKey;
   state.sortDirection = sortDirections.has(sortDirection) ? sortDirection : defaultSortDirectionFor(nextSortKey);
 }
@@ -92,7 +98,16 @@ function readUrlState() {
 function syncControlsFromState() {
   els.titleFilter.value = state.title;
   els.disciplineFilter.value = state.discipline;
+  syncTextMatchToggle();
   els.detailFilter.value = state.detail;
+}
+
+function syncTextMatchToggle() {
+  const isAny = state.textMatchMode === "any";
+  els.textMatchToggle.classList.toggle("is-any", isAny);
+  els.textMatchToggle.setAttribute("aria-pressed", String(isAny));
+  els.textMatchToggle.title = isAny ? "Either title or discipline can match" : "Both title and discipline must match";
+  els.textMatchValue.textContent = isAny ? "Any" : "All";
 }
 
 function addParam(parts, key, value) {
@@ -105,6 +120,7 @@ function urlFromState() {
   addParam(parts, "title", state.title);
   addParam(parts, "field", state.discipline);
   addParam(parts, "detail", state.detail);
+  if (state.textMatchMode !== defaultTextMatchMode) addParam(parts, "match", state.textMatchMode);
 
   for (const rating of ["A*", "A", "B", "C"]) {
     if (state.ratings.has(rating)) addParam(parts, "rating", ratingToParam.get(rating));
@@ -325,11 +341,19 @@ function includesAnyText(value, query) {
 }
 
 function rowMatchesSearchFilters(row) {
-  if (!titleMatchesAny(row, state.title)) return false;
-  if (state.discipline) {
-    const target = `${row.discipline} ${row.forCode}`;
-    if (!includesAnyText(target, state.discipline)) return false;
+  const titleIsActive = Boolean(state.title);
+  const disciplineIsActive = Boolean(state.discipline);
+  const titleMatch = titleMatchesAny(row, state.title);
+  const disciplineTarget = `${row.discipline} ${row.forCode}`;
+  const disciplineMatch = includesAnyText(disciplineTarget, state.discipline);
+
+  if (state.textMatchMode === "any" && (titleIsActive || disciplineIsActive)) {
+    if (!((titleIsActive && titleMatch) || (disciplineIsActive && disciplineMatch))) return false;
+  } else {
+    if (!titleMatch) return false;
+    if (!disciplineMatch) return false;
   }
+
   if (state.detail) {
     const target = `${row.publisher} ${row.issn} ${row.issnOnline} ${row.forCode} ${row.year} ${row.ft50 ? "FT50" : ""} ${row.utd24 ? "UTD24" : ""}`;
     if (!includesAnyText(target, state.detail)) return false;
@@ -502,8 +526,10 @@ function resetFilters() {
   state.ft50Only = false;
   state.utd24Only = false;
   state.detail = "";
+  state.textMatchMode = defaultTextMatchMode;
   els.titleFilter.value = "";
   els.disciplineFilter.value = "";
+  syncTextMatchToggle();
   els.detailFilter.value = "";
   updateState();
 }
@@ -558,6 +584,12 @@ function bindEvents() {
   els.disciplineFilter.addEventListener("input", (event) => {
     state.discipline = normalize(event.target.value);
     updateState({ urlDelay: 350 });
+  });
+
+  els.textMatchToggle.addEventListener("click", () => {
+    state.textMatchMode = state.textMatchMode === "any" ? defaultTextMatchMode : "any";
+    syncTextMatchToggle();
+    updateState();
   });
 
   els.detailFilter.addEventListener("input", (event) => {

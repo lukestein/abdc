@@ -10,6 +10,7 @@ The page is available as a public website at [lukestein.com/abdc](https://lukest
 
 - Fast partial-title search, including acronym-style searches such as `AEJ`, `JFE`, `RFS`, `restud`, and `REStat`.
 - Comma-separated title, discipline, publisher, ISSN, year, and FoR searches that return the union of matches within each field.
+- Optional `All`/`Any` matching for title and discipline filters, including shareable union URLs such as `?match=any&title=financ&field=finance`.
 - Quoted journal title searches, such as `"Management Science"`, for exact full-title matches.
 - Multi-select rating filters for `A*`, `A`, `B`, and `C`.
 - Visible `FT50` and `UTD24` badges and filters for the April 2026 Financial Times Top 50 journal list and UT Dallas Top 24 business journals.

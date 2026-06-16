@@ -48,6 +48,12 @@
           <input id="discipline-filter" type="search" list="discipline-options" autocomplete="off" placeholder="Finance, economics, 3502">
           <datalist id="discipline-options"></datalist>
         </label>
+        <div class="match-control" aria-label="Title and discipline match mode">
+          <button id="text-match-toggle" class="match-toggle" type="button" aria-pressed="false" title="Toggle title and discipline matching">
+            <span>Match:</span>
+            <strong id="text-match-value">All</strong>
+          </button>
+        </div>
         <label class="control">
           <span>Publisher/Year/ISSN</span>
           <input id="detail-filter" type="search" autocomplete="off" placeholder="Elsevier, 1974, 0304-405X">

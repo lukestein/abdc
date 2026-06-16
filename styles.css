@@ -141,13 +141,14 @@ footer {
 
 .controls {
   display: grid;
-  grid-template-columns: minmax(250px, 1.25fr) minmax(180px, 0.82fr) minmax(190px, 0.9fr) minmax(250px, 1fr) minmax(224px, auto);
+  grid-template-columns: minmax(250px, 1.25fr) minmax(180px, 0.82fr) 70px minmax(190px, 0.9fr) minmax(250px, 1fr) minmax(224px, auto);
   gap: 12px;
   align-items: end;
   padding: 16px;
 }
 
 .control,
+.match-control,
 .sort-control,
 .utility-actions,
 .download-actions {
@@ -227,6 +228,49 @@ button:focus-visible {
 
 button {
   cursor: pointer;
+}
+
+.match-control {
+  align-items: end;
+  min-height: 46px;
+}
+
+.match-toggle {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  gap: 2px;
+  width: 58px;
+  height: 46px;
+  max-width: 100%;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted);
+  padding: 4px 6px;
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1;
+  text-align: center;
+}
+
+.match-toggle span {
+  font-size: 0.62rem;
+}
+
+.match-toggle strong {
+  color: inherit;
+  font-size: 0.86rem;
+  font-weight: 780;
+}
+
+.match-toggle:hover,
+.match-toggle.is-any {
+  border-color: rgba(15, 118, 110, 0.22);
+  background: #f4faf8;
+  color: var(--accent-dark);
 }
 
 .button-row button,
@@ -509,7 +553,7 @@ footer a {
 
 @media (max-width: 1400px) {
   .controls {
-    grid-template-columns: minmax(220px, 1fr) minmax(180px, 0.85fr) minmax(210px, 1fr) minmax(260px, 1.1fr) minmax(224px, auto);
+    grid-template-columns: minmax(220px, 1fr) minmax(180px, 0.85fr) 70px minmax(210px, 1fr) minmax(260px, 1.1fr) minmax(224px, auto);
   }
 }
 
